@@ -8,8 +8,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity
+@Entity(name = "crew")
+@Getter
+@Setter
 public class Crew{
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
