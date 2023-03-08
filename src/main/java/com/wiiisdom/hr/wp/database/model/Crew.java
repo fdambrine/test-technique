@@ -15,7 +15,7 @@ public class Crew{
     @GeneratedValue(strategy= GenerationType.AUTO)
     private int id;
     @ManyToOne
-    @JoinColumn(name = "consuctorId")
+    @JoinColumn(name = "constructorId")
     private Constructor constructor;
     @ManyToOne
     @JoinColumn(name = "driverId")
