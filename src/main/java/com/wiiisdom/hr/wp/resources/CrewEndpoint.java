@@ -20,10 +20,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transaction;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -103,22 +107,29 @@ public class CrewEndpoint {
         Constructor constructor = new Constructor();
         constructor.setName(registration.getConstructorName());
         constructor.setNationality(registration.getNationality());
-        entityManager.merge(constructor);
-        for (DriverRegistration driverRegistration : registration.getDrivers()) {
-            Driver driver = new Driver();
-            driver.setForename(driverRegistration.getFirstName());
-            driver.setSurname(driverRegistration.getLastName());
-            driver.setNumber(driverRegistration.getNumber());
-            driver.setNationality(driver.getNationality());
-            entityManager.merge(driver);
-            Crew crew = new Crew();
-            crew.setConstructor(constructor);
-            crew.setDriver(driver);
-            crew.setSeason(seasonEntity);
-            entityManager.merge(crew);
-
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+            entityManager.merge(constructor);
+            for (DriverRegistration driverRegistration : registration.getDrivers()) {
+                Driver driver = new Driver();
+                driver.setForename(driverRegistration.getFirstName());
+                driver.setSurname(driverRegistration.getLastName());
+                driver.setNumber(driverRegistration.getNumber());
+                driver.setNationality(driver.getNationality());
+                entityManager.merge(driver);
+                Crew crew = new Crew();
+                crew.setConstructor(constructor);
+                crew.setDriver(driver);
+                crew.setSeason(seasonEntity);
+                entityManager.merge(crew);
+            }
+            transaction.commit();
+        } catch (PersistenceException e) {
+            transaction.rollback();
+            LOGGER.log(Level.SEVERE, "Failed to persist crew", e);
+            throw new InternalServerErrorException("Could not persist crew");
         }
-        entityManager.flush();
         return new CreationResponse(constructor.getId());
     }
 }
