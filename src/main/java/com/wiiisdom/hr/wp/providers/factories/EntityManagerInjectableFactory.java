@@ -16,7 +16,6 @@ public class EntityManagerInjectableFactory implements Factory<EntityManager> {
     public static final String JDBC_USER = "javax.persistence.jdbc.user";
     public static final String HIBERNATE_DIALECT = "hibernate.dialect";
     public static final String JDBC_DRIVER = "javax.persistence.jdbc.driver";
-    public static final String JDBC_WINDOWS_AUTH = "javax.persistence.jdbc.windows.auth";
     private final EntityManagerFactory managerFactory;
 
     public EntityManagerInjectableFactory() {
